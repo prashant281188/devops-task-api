@@ -32,7 +32,7 @@ jobs:
         env:
           PORT: 3000
           NODE_ENV: test
-          DATABASE_URL: postgresql://taskapp:taskpass@localhost:5432/taskdb
+          DATABASE_URL: postgresql://taskapp:admin@localhost:5432/taskdb
 
       - name: Build TypeScript
         run: npm run build
