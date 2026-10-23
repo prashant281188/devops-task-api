@@ -1,0 +1,65 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: devops-task-api
+  namespace: task-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: devops-task-api
+  template:
+    metadata:
+      labels:
+        app: devops-task-api
+    spec:
+      containers:
+        - name: api
+          image: ghcr.io/prashant281188/devops-task-api:latest
+          imagePullPolicy: Always
+          ports:
+            - name: http
+              containerPort: 3000
+          env:
+            - name: NODE_ENV
+              value: production
+            - name: PORT
+              value: "3000"
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: task-api-db-url
+                  key: DATABASE_URL
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 256Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: devops-task-api
+  namespace: task-api
+spec:
+  type: ClusterIP
+  selector:
+    app: devops-task-api
+  ports:
+    - name: http
+      port: 3000
+      targetPort: http
